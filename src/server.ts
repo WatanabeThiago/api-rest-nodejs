@@ -1,15 +1,25 @@
 import fastify from 'fastify'
 import { knex } from './database'
+import { randomUUID } from 'crypto'
+import { env } from './env'
 
 const app = fastify()
 
 app.get('/hello', async () => {
-  return knex('sqlite_schema').select('*')
+  const transaction = await knex('transactions')
+    .insert({
+      id: randomUUID(),
+      title: 'Test',
+      amount: 1000,
+    })
+    .returning('*')
+
+  return transaction
 })
 
 app
   .listen({
-    port: 3333,
+    port: env.PORT,
   })
   .then(() => {
     console.log('Servidor incianod')
